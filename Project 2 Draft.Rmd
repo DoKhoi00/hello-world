@@ -1,0 +1,139 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+---
+
+ 
+## Introduction
+
+#### Scientific Question: 
+
+Does the amino acids sequences of the tumor suppressor gene P53 have a sequence identity less than 80% compared to other tumor suppressors which provides the possible explanation of the ineffectiveness of one single drug targeting the tumor suppressor genes? 
+
+#### Background:
+
+With the role of tumor suppressor genes of limiting cell proliferation and therefore stopping the formation of a tumor in the specific area within the body, a mutation within these genes that causes a loss of function within the gene will result in tumor growth as this is one of the hall marks of cancer (Hinds, 1994). One important tumor suppressor gene that is often found in patients with cancer is the mutation of the gene p53 as the mutation of this gene are found in more than 50% of patients diagnosed with cancer (Soussi 2000). This gene is responsible for stopping the cell cycle progression and allowing the damaged DNA to be repaired or apoptosis to be induced if the damages are not repairable. (Soussi 2000).     
+
+#### Scientific Hypothesis:
+
+If the binding site of the tumor suppressor gene p53 amino acids sequence is less than 80% similarity in terms of sequence identity compared to other tumor suppressors with similar functions, then one can see that there is a possible explanation as to why one single therapy targeting tumor suppressor genes are ineffective. 
+
+#### Methods:
+I will utilize both the pairwise and multiple sequence alignment bioinformatics method in order t compare the sequences of other tumor suppressors to that of my gene of interest p53 gene. From there, I will create a heat map in order to compare whether other tumor suppressors are similar to that of p53. From the pairwise sequence alignment, I will be able to obtain the sequence alignment score in which will help explain whether the sequences of the tumor suppressors are similar to one another. I will also use Bio3D to compare the protein structures of these tumor suppressors specifically looking at their binding sites. I will also use the sequence logo to look at the conserved sites from these genes as that will help to explain whether these genes are similar to one another. 
+
+```{r}
+#Packages Needed
+library(BiocManager)
+library(Biostrings)
+library(seqinr)
+library(msa)
+library(muscle)
+library(bio3d)
+#tinytex::install_tinytex()
+library(tinytex)
+```
+
+```{r}
+#Bioinformatics Analysis
+
+#Loading in fasta files for each tumor suppressors & Converting them to vectors to use in other functions
+
+p53_unaligned <- readAAStringSet("p53.fasta")
+#typeof(p53_unaligned)
+p53_unaligned
+
+p53_file <- read.fasta(file = "p53.fasta")
+#BRCA2_file <- read.fasta(file = "BRCA2.fasta")
+#CDKN2A_file <- read.fasta(file = "CDKN2A.fasta")
+#MLH1_file <- read.fasta("MLH1.fasta")
+#NF1_file <- read.fasta("NF1.fasta")
+#RB1_file <- read.fasta("RB1.fasta")
+
+#all_files <- c(p53_file, BRCA2_file, CDKN2A_file, MLH1_file, NF1_file, RB1_file)
+
+#p53_file
+
+#typeof(p53_file)
+
+#length(p53_file)
+
+#vector_data <- 1:length(p53_file)
+
+#vector_data
+
+#typeof(vector_data_all_files)
+```
+
+
+```{r}
+#PDB & Bio3d
+
+pdb_structure_p53 <- read.pdb("1TUP")
+
+binding_site_p53 <- binding.site(pdb_structure_p53)
+
+binding_site_resno <- binding_site_p53$resno
+
+binding_site_p53$resnames
+
+binding_site_resno[1]
+
+
+#msaPrettyPrint(msa_p53, output="tex", y=c((binding_site_resno[1]), (binding_site_resno[length(binding_site_resno)])),subset=c(1:6), showNames="left", showLogo="top",logoColors="rasmol", shadingMode="functional", shadingModeArg="structure",showLegend=FALSE, askForOverwrite=FALSE)
+
+
+#tinytex::pdflatex('x.tex')
+
+
+
+#Multiple sequence alignment
+msa_p53 <- msa(p53_unaligned)
+system.file("tex", "texshade.sty", package="msa")
+
+#Code Checks
+pdb_structure_p53
+print(msa_p53, show= "complete")
+```
+
+```{r}
+#Pairwise & Heat Map
+Matrix_into_heatmap <- function(S4sequences, sequence_length) {
+  heatmap <- matrix(nrow=length(x), ncol = length(x))
+  for (i in seq_length) {
+    for (j in seq_length) {
+      
+      string_1 <- S4sequences[i]
+      string_2 <- S4sequences[j]
+      
+      character_1 <- AAStringSetList(string_1)
+      as.character(unlist(character_1))
+      character_list_1 <- as(character_1, "CharacterList")
+      as.list(character_list_1)
+      
+      character_2 <- AAStringSetList(string_2)
+      as.character(unlist(character_2))
+      character_list_2 <- as(character_2, "CharacterList")
+      as.list(character_list_2)
+      
+      pairwise_test <- pairwiseAlignment(pattern = c(character_list_2), subject = character_1)
+      
+      heatmap[i,j] <- score(pa)
+    }
+  }
+  return(heatmap)
+}
+
+#sequence_matrix_alignment <- Matrix_into_heatmap(p53_file, vector_data)
+
+#typeof (p53_unaligned)
+#typeof(vector_data)
+
+#heatmap.2(sequence_matrix_alignment)
+
+#Doesn't work yet
+```
+
+References:
